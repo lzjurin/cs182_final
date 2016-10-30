@@ -1,5 +1,6 @@
 import sys
 
+# Invalid piece exception class, meant to propogate piece initialization errors to the main app to be logged
 class InvalidPieceError(Exception):
     def __init__(self, piece, err):
         self.piece = piece
@@ -8,6 +9,8 @@ class InvalidPieceError(Exception):
     def __str__(self):
         return "{0} {1}".format(self.piece, self.err)
 
+# Interface definition for Pieces
+# Need to have moves, a value, a position, a string and character representation, and a player
 class AbstractPiece(object):
     def __init__(self, position=None, value=None, player=None):
         self.position = position
@@ -37,15 +40,23 @@ class AbstractPiece(object):
     getStr = __str__
     __repr__ = __str__
 
+# General implementation of a piece, cannot be used on its own
+# Triggers the initialization from the AbstractPiece class to store the player, position, and value, and overrides all methods
 class GenericPiece(AbstractPiece):
     def __init__(self, position=None, value=None, player=None):
+        # Allows initialization of a piece with just e.g. Pawn(1, 2), defaulting to piece default value and default player when this is done
         if type(position).__name__ == type(value).__name__ == 'int' and self.defaultvalue:
             super(GenericPiece, self).__init__((position, value), self.defaultvalue, player)
         else:
             super(GenericPiece, self).__init__(position, value if value else self.defaultvalue, player)
+
+        # Validates the piece's position and value
         self.validate()
+
+        # Generally pieces move linearly, notable exception being the Knight (overridden in its class)
         self.linear = True
 
+    # Ensures position is of type tuple with two ints, and value is a nonnegative integer
     def validate(self):
         if not self.position:
             raise InvalidPieceError(self, "must be created with a position in format (i, j)")
@@ -57,8 +68,9 @@ class GenericPiece(AbstractPiece):
         elif type(self.value).__name__ != 'int':
             raise InvalidPieceError(self, "cannot be created with noninteger value {0}".format(self.value))
         elif self.value < 1:
-            raise InvalidPieceError(self, "cannot be created with nonpositive value {0}".format(self.value))
+            raise InvalidPieceError(self, "cannot be created with negative value {0}".format(self.value))
 
+    # Defaults to no moves available
     def moves(self):
         return []
 
@@ -71,6 +83,7 @@ class GenericPiece(AbstractPiece):
     def __str__(self):
         return "Piece type {0} at position {1} with value {2}".format(self.__class__, self.position, self.value)
 
+    # Character representation defaults ot the first letter of the piece with the exception of the Knight which is N. Lowercase if black player, uppercase if white player.
     def charRep(self, ini=None):
         ini = ini if ini else self.__class__.__name__[0]
         return ini if self.player == "White" else ini.lower()
@@ -92,11 +105,14 @@ class GenericPiece(AbstractPiece):
             return True
         return False
 
-
     getVal = __value__
     getPos = __position__
     getStr = __str__
     __repr__ = __str__
+
+##########################
+# Here they come!
+##########################
 
 class Pawn(GenericPiece):
     def __init__(self, position=None, value=None, player="White"):
@@ -126,9 +142,10 @@ class Bishop(GenericPiece):
                     [ (-1, -1), (-1, 1), (1, -1), (1, 1) ] ) )
 
 class Rook(GenericPiece):
-    def __init__(self, position=None, value=None, player="White"):
+    def __init__(self, position=None, value=None, player="White", moved=False):
         self.defaultvalue = 5
         super(self.__class__, self).__init__(position, value, player)
+        self.moved = moved
 
     def moves(self):
         # Flatten the lists of moves across directions
@@ -158,9 +175,10 @@ class Queen(GenericPiece):
                     [ (-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0), (1, 1) ] ) )
 
 class King(GenericPiece):
-    def __init__(self, position=None, value=None, player="White"):
+    def __init__(self, position=None, value=None, player="White", moved=False):
         self.defaultvalue = sys.maxint
         super(self.__class__, self).__init__(position, value, player)
+        self.moved = moved
 
     def moves(self):
         # Map directions across the position

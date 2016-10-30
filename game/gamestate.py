@@ -1,6 +1,15 @@
 import sys, math, itertools
 from pieces import *
 
+# Invalid move exception class, meant to propogate errors to the main app to be logged
+class InvalidMoveException(Exception):
+    def __init__(self, move, err):
+        self.move = move
+        self.err = err
+
+    def __str__(self):
+        return "Move from {0} to {1} is invalid: {2}".format(move[0], move[1], err)
+
 # Config class. Meant only to keep track of pieces still on the board and their positions.
 class GameConfig(object):
     def __init__(self, pieces=None):
@@ -28,7 +37,7 @@ class GameState(object):
         self.player = player
         self.positions = dict([ (piece.getPos(), piece) for piece in self.config.pieces ])
         self.board = [ [self.positions[i, j] if (i, j) in self.positions else None for j in range(8)] for i in range(8) ]
-        self.log = []
+        self.lastmove = None
 
     # When printing the game state, your pieces are uppercase and the opponent's are lowercase
     def __str__(self):
@@ -38,50 +47,68 @@ class GameState(object):
         return out
 
     def move(self, start, end):
-        print start, end
+        # Ensure both moves are on the board
         if not (self.onBoard(start) and self.onBoard(end)):
-            print "That move doesn't start/end on the board."
-            return False
+            raise InvalidMoveException((start, end), "doesn't start/end on the board.")
+
+        # Ensure there's a piece at the starting position
         piece = self.positions[start]
         if not piece:
-            print "No piece at that starting position."
-            return False
+            raise InvalidMoveException((start, end), "no piece at starting position")
 
-        print piece
-        print piece.moves()
-
+        # Ensure the piece is yours
         if piece.player != self.player:
-            print piece.player
-            print "You can't move a piece that's not yours!"
-            return False
+            raise InvalidMoveException((start, end), "piece does not belong to player")
 
+        # If the current piece is a Pawn, could take a piece diagonally
+        endpiece = None
+        if piece.getClass() == 'Pawn':
+            # Check for end being diagonally ahead and ensure that there's an enemy piece there
+            moveOne = piece.moves()[0]
+            if end in ((moveOne[0], moveOne[1] - 1), (moveOne[0], moveOne[1] + 1)):
+                if end in self.positions:
+                    if self.positions[end].player == self.player:
+                        raise InvalidMoveException((start, end), "Cannot take your own piece!")
+                    endpiece = self.positions[end]
+                    self.config.pieces.remove(self.positions[end])
+
+
+        # Get list of possible moves and ensure move is possible and isn't blocked
         possibleMoves = [move for move in piece.moves() if self.onBoard(move)]
         if not end in possibleMoves:
-            print "The piece at position {0} cannot move to position {1}".format(start, end)
-            return False
+            raise InvalidMoveException((start, end), "piece cannot move in that manner")
 
         if piece.linear:
             between = zip(range(start[0], end[0]), range(start[1], end[1]))
             if between[1:]:
                 for el in between[1:]:
                     if self.positions[el]:
-                        print "The piece at position {0} is blocked from moving to position {1}".format(start, end)
-                        return False
+                        raise InvalidMoveException((start, end), "piece movement is blocked in that direction")
 
-        piece.setPosition(end)
-        del self.positions[start]
-        if end in self.positions.keys():
+        # Check that the end position isn't one of the player's own pieces
+        if end in self.positions:
             if self.positions[end].player == self.player:
-                print "Cannot take your own piece!"
-                return False
+                raise InvalidMoveException((start, end), "Cannot take your own piece!")
+
+            # Delete the other player's piece
+            endpiece = self.positions[end]
             self.config.pieces.remove(self.positions[end])
+
+        # Move the piece and update tracked positions
+        piece.setPosition(end)
+        startpiece = piece
+        del self.positions[start]
         self.positions[end] = piece
+
+        # Update board positions
         self.board[start[0]][start[1]] = None
         self.board[end[0]][end[1]] = piece
-        print self.board[end[0]][end[1]]
 
+        # Update last move
+        self.lastmove = (startpiece, endpiece, start, end)
+
+        # Return success
         return True
-
 
     def onBoard(self, pos):
         return -1 < pos[0] < 8 and -1 < pos[1] < 8
