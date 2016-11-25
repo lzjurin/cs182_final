@@ -1,4 +1,4 @@
-from game.gamestate import *
+from game.game import GameState
 
 game = GameState()
 print game

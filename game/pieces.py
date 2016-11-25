@@ -83,10 +83,10 @@ class GenericPiece(AbstractPiece):
     def __str__(self):
         return "Piece type {0} at position {1} with value {2}".format(self.__class__, self.position, self.value)
 
-    # Character representation defaults ot the first letter of the piece with the exception of the Knight which is N. Lowercase if black player, uppercase if white player.
+    # Character representation defaults to the first letter of the piece with the exception of the Knight which is N. Lowercase if black player, uppercase if white player.
     def charRep(self, ini=None):
         ini = ini if ini else self.__class__.__name__[0]
-        return ini if self.player == "White" else ini.lower()
+        return ini.upper() if self.player == "White" else ini.lower()
 
     def getPlayer(self):
         if not self.player:
@@ -120,7 +120,7 @@ class Pawn(GenericPiece):
         super(self.__class__, self).__init__(position, value, player)
 
     def moves(self):
-        return [ (self.position[0] + y, self.position[1]) for y in (range(1, 3) if self.player == "Black" else range(-2, 0))]
+        return [(self.position[0] + 1 if self.player == "Black" else -1, self.position[1])]
 
     def promoteable(self):
         return not self.position[1] % 7
