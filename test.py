@@ -1,16 +1,13 @@
-from game.game import GameState
+from game.game import *
+import chess
+import os, sys
 
-game = GameState()
-print game
-
-game.move((1, 1), (1, 3))
-
-print game
-
-game.move((6, 1), (4, 1))
-
-print game
-
-game.move((7, 1), (5, 2))
-
-print game
+tests = os.listdir('tests/')
+for test in tests:
+    moves = [line.strip() for line in open('tests/{0}'.format(test)).readlines()]
+    game = chess.Board()
+    for move in moves:
+        try:
+            game.push_san(move)
+        except ValueError as e:
+            print e
