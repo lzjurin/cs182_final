@@ -13,7 +13,7 @@ class Game(object):
             print e
 
     def legalMoves(self):
-        return [str(move) for move in self.game.legalmoves]
+        return [str(move) for move in self.game.legal_moves]
 
     def turn(self):
         return "White" if self.game.turn else "Black"
