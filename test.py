@@ -1,6 +1,12 @@
 from game.game import *
+from game.eval import *
 
 newgame = Game()
-print newgame.available()
-print newgame.threatened()
-print newgame.pieces(True, 1)
+ev = ChessAI(newgame)
+
+print ev.eval()
+newgame.move_san("Nc3")
+newgame.move_san("Nc6")
+newgame.move_san("d4")
+
+print ev.eval()

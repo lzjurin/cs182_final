@@ -1,8 +1,10 @@
 import chess
 import os, sys
 class ChessAI:
-    def __init__(self,gamestate):
+    def __init__(self, gamestate, params=[1, 1]):
         self.gamestate = gamestate
+        self.params = params
+
     def material(self):
         whiteScore = len(self.gamestate.pieces(True,1)) + 3 * (len(self.gamestate.pieces(True,2)) + len(self.gamestate.pieces(True,3))) + 5 * len(self.gamestate.pieces(True,4)) + 9 * len(self.gamestate.pieces(True,5))
         blackScore = len(self.gamestate.pieces(False,1)) + 3 * (len(self.gamestate.pieces(False,2)) + len(self.gamestate.pieces(False,3))) + 5 * len(self.gamestate.pieces(False,4)) + 9 * len(self.gamestate.pieces(False,5))
@@ -57,7 +59,7 @@ class ChessAI:
                         smallerThreat = True
                     pieceThreat += 1
                 for friendlyPiece in self.gamestate.threatened()[0][y][x]:
-                    if enemyPiece[1] in self.gamestate.BLesserValue[n]:
+                    if friendlyPiece[1] in self.gamestate.BLesserValue[n]:
                         wSum += .25
                     pieceThreat -= 1
                 if pieceThreat > 0 and smallerThreat:
@@ -71,15 +73,16 @@ class ChessAI:
                         bSum -= 1
                         smallerThreat = True
                     pieceThreat += 1
-                for friendlyPiece in self.gamestate.threatened()[q][y][x]:
-                    if enemyPiece[1] in self.gamestate.WLesserValue[n]:
+                for friendlyPiece in self.gamestate.threatened()[1][y][x]:
+                    if friendlyPiece[1] in self.gamestate.WLesserValue[n]:
                         bSum += .25
                         pieceThreat -= 1
                 if pieceThreat > 0 and smallerThreat:
                     bSum -= self.gamestate.values[n]
         return wSum - bSum
     def eval(self):
-        return self.threat() + self.material()
+        return sum(map(lambda (x, y): float(x) * y, zip(self.params, [self.threat(), self.material()])))
+
     def moveEval(self):
         moves = []
         for move in self.legalMoves():
