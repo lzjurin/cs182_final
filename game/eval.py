@@ -80,6 +80,20 @@ class ChessAI:
                 if pieceThreat > 0 and smallerThreat:
                     bSum -= self.gamestate.values[n]
         return wSum - bSum
+
+    def nextMove(self, depth=1):
+        if not depth:
+            return (self.eval(), None)
+        func = max if (depth & 1) == int(self.gamestate.turn_bool()) else min
+        vals = []
+        for move in self.gamestate.legalMoves():
+            self.gamestate.move(move)
+            vals.append(self.nextMove(depth - 1)[0])
+            self.gamestate.undo()
+        val = func(vals)
+        return (val, self.gamestate.legalMoves()[vals.index(val)])
+
+
     def eval(self):
         return sum(map(lambda (x, y): float(x) * y, zip(self.params, [self.threat(), self.material()])))
 

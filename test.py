@@ -10,3 +10,5 @@ newgame.move_san("Nc6")
 newgame.move_san("d4")
 
 print ev.eval()
+print ev.nextMove(1)
+

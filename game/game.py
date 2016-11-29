@@ -30,11 +30,20 @@ class Game(object):
         except ValueError as e:
             print e
 
+    def undo(self):
+        try:
+            self.game.pop()
+        except Exception as e:
+            print e
+
     def legalMoves(self):
         return [move for move in self.game.legal_moves]
 
     def turn(self):
         return "White" if self.game.turn else "Black"
+
+    def turn_bool(self):
+        return self.game.turn
 
     def getPositions(self):
         return [row.split() for row in self.game.__str__().split('\n')]
