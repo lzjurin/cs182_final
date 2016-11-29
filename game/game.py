@@ -2,8 +2,11 @@ import chess
 import os, sys
 
 class Game(object):
-    def __init__(self):
-        self.game = chess.Board()
+    def __init__(self, config=None):
+        if not config:
+            self.game = chess.Board()
+        else:
+            self.game = chess.Board(fen=config)
         self.squares = chess.SQUARES
 
         self.WLesserValue = {1: [],2:[chess.Piece.from_symbol('p')],\
