@@ -36,20 +36,24 @@ class Game(object):
         legal = [move for move in self.game.legal_moves]
         legalsquares = {}
         for move in legal:
+            piece = self.game.piece_at(move.from_square)
+            tosquare_tup = (move.to_square / 8, move.to_square % 8)
             if not move.to_square in legalsquares:
-                legalsquares[move.to_square] = [self.game.piece_at(move.from_square)]
+                legalsquares[tosquare_tup] = [piece]
             else:
-                legalsquares[move.to_square].append(self.game.piece_at(move.from_square))
+                legalsquares[tosquare_tup].append(piece)
 
         self.game.turn = not self.game.turn
 
         otherlegal = [move for move in self.game.legal_moves]
         otherlegalsquares = {}
         for move in otherlegal:
+            piece = self.game.piece_at(move.from_square)
+            tosquare_tup = (move.to_square / 8, move.to_square % 8)
             if not move.to_square in otherlegalsquares:
-                otherlegalsquares[move.to_square] = [self.game.piece_at(move.from_square)]
+                otherlegalsquares[tosquare_tup] = [piece]
             else:
-                otherlegalsquares[move.to_square].append(self.game.piece_at(move.from_square))
+                otherlegalsquares[tosquare_tup].append(piece)
 
         self.game.turn = not self.game.turn
 
