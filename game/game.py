@@ -28,8 +28,8 @@ class Game(object):
         return self.game.__str__()
 
     def threatened(self):
-        white = [[map(self.game.piece_at, list(self.game.attackers(True, row * 8 + col))) for col in range(8)] for row in range(8)]
-        black = [[map(self.game.piece_at, list(self.game.attackers(False, row * 8 + col))) for col in range(8)] for row in range(8)]
+        white = [[map(lambda pos: ((pos / 8, pos % 8), self.game.piece_at(pos)), list(self.game.attackers(True, row * 8 + col))) for col in range(8)] for row in range(8)]
+        black = [[map(lambda pos: ((pos / 8, pos % 8), self.game.piece_at(pos)), list(self.game.attackers(False, row * 8 + col))) for col in range(8)] for row in range(8)]
         return (white, black)
 
     def available(self):
