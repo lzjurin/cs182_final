@@ -1,0 +1,88 @@
+import chess
+import os, sys
+class ChessAI:
+    def __init__(self,gamestate):
+        self.gamestate = gamestate
+    def material(self):
+        whiteScore = len(self.gamestate.pieces(True,1)) + 3 * (len(self.gamestate.pieces(True,2)) + len(self.gamestate.pieces(True,3))) + 5 * len(self.gamestate.pieces(True,4)) + 9 * len(self.gamestate.pieces(True,5))
+        blackScore = len(self.gamestate.pieces(False,1)) + 3 * (len(self.gamestate.pieces(False,2)) + len(self.gamestate.pieces(False,3))) + 5 * len(self.gamestate.pieces(False,4)) + 9 * len(self.gamestate.pieces(False,5))
+        return  whiteScore - blackScore
+    # def advance(self):
+    #     wSum = -self.gamestate.pieces(True,6)[0][0]
+    #     bSum = 8 - self.gamestate.pieces(False,6)[0][0]
+    #     for n in range(1,6):
+    #         for piece in self.gamestate.pieces(True,n):
+    #             wS += min(1,piece[0]/float(4)) if
+    #         for piece in self.gamestate.Bpieces:
+    #             bSum += int(piece[-1])
+    #     for k in self.gamestate.Wknights:
+    #         if '1' in k or '8' in k or 'a' in k or 'h' in k:
+    #             wSum -= 1
+    #     for k in self.gamestate.Bknights:
+    #         if '1' in k or '8' in k or 'a' in k or 'h' in k:
+    #             bSum -= 1
+    #     for b in self.gamestate.Wbishops:
+    #         if b == 'a1' or b == 'a8' or b=='h1' or b=='h8':
+    #             wSum -= 1
+    #     for b in self.gamestate.Bknights:
+    #         if b == 'a1' or b == 'a8' or b=='h1' or b=='h8':
+    #             bSum -= 1
+    #     return wSum - bSum
+    # def pawns(self):
+    def space(self):
+        wTotal = 0
+        bTotal = 0
+        for k in self.gamestate.available().keys():
+            if k[0]<4:
+                wTotal += 1
+            else:
+                bTotal += 1
+        return wTotal - bTotal
+    def threat(self):
+        wSum = 0
+        bSum = 0
+        for n in range(1,7):
+            # Get White and Black pieces
+            wPieces = self.gamestate.pieces(True,n)
+            bPieces = self.gamestate.pieces(False,n)
+            # Get coordinates of white pieces
+            for y,x in wPieces:
+                # Get coordinates of attacking pieces
+                pieceThreat = 0
+                smallerThreat = False
+                for enemyPiece in self.gamestate.threatened()[1][y][x]:
+                    # Checks if enemy piece is worth less
+                    if enemyPiece[1] in self.gamestate.WLesserValue[n]:
+                        wSum -= 1
+                        smallerThreat = True
+                    pieceThreat += 1
+                for friendlyPiece in self.gamestate.threatened()[0][y][x]:
+                    if enemyPiece[1] in self.gamestate.BLesserValue[n]:
+                        wSum += .25
+                    pieceThreat -= 1
+                if pieceThreat > 0 and smallerThreat:
+                    wSum -= self.gamestate.values[n]
+            for y,x in bPieces:
+                # Get coordinates of attacking pieces
+                pieceThreat = 0
+                smallerThreat = False
+                for enemyPiece in self.gamestate.threatened()[0][y][x]:
+                    if enemyPiece[1] in self.gamestate.BLesserValue[n]:
+                        bSum -= 1
+                        smallerThreat = True
+                    pieceThreat += 1
+                for friendlyPiece in self.gamestate.threatened()[q][y][x]:
+                    if enemyPiece[1] in self.gamestate.WLesserValue[n]:
+                        bSum += .25
+                        pieceThreat -= 1
+                if pieceThreat > 0 and smallerThreat:
+                    bSum -= self.gamestate.values[n]
+        return wSum - bSum
+    def eval(self):
+        return self.threat() + self.material()
+    def moveEval(self):
+        moves = []
+        for move in self.legalMoves():
+            c = ChessAI(self.gamestate.move(move))
+            moves.append(c.eval(),move)
+        return max(moves)[1]

@@ -6,6 +6,18 @@ class Game(object):
         self.game = chess.Board()
         self.squares = chess.SQUARES
 
+        self.WLesserValue = {1: [],2:[chess.Piece.from_symbol('p')],\
+        3:[chess.Piece.from_symbol('p')],4:[chess.Piece.from_symbol('p'),chess.Piece.from_symbol('b'),chess.Piece.from_symbol('n')],\
+        5: [chess.Piece.from_symbol('p'),chess.Piece.from_symbol('b'),chess.Piece.from_symbol('n'),chess.Piece.from_symbol('r')],\
+        6: [chess.Piece.from_symbol('p'),chess.Piece.from_symbol('b'),chess.Piece.from_symbol('n'),chess.Piece.from_symbol('r'),chess.Piece.from_symbol('q')]}
+
+        self.BLesserValue = {1: [],2:[chess.Piece.from_symbol('P')],\
+        3:[chess.Piece.from_symbol('P')],4:[chess.Piece.from_symbol('P'),chess.Piece.from_symbol('B'),chess.Piece.from_symbol('N')],\
+        5: [chess.Piece.from_symbol('P'),chess.Piece.from_symbol('B'),chess.Piece.from_symbol('N'),chess.Piece.from_symbol('R')],\
+        6: [chess.Piece.from_symbol('P'),chess.Piece.from_symbol('B'),chess.Piece.from_symbol('N'),chess.Piece.from_symbol('R'),chess.Piece.from_symbol('Q')]}
+        self.values = {1:1,2:3,3:3,4:5,5:9,6:1000}
+
+
     def move(self, move):
         try:
             self.game.push(move)
