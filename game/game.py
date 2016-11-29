@@ -8,12 +8,18 @@ class Game(object):
 
     def move(self, move):
         try:
+            self.game.push(move)
+        except Exception as e:
+            print e
+
+    def move_san(self, move):
+        try:
             self.game.push_san(move)
         except ValueError as e:
             print e
 
     def legalMoves(self):
-        return [str(move) for move in self.game.legal_moves]
+        return [move for move in self.game.legal_moves]
 
     def turn(self):
         return "White" if self.game.turn else "Black"
