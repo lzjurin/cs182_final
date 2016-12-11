@@ -41,7 +41,7 @@ class Game(object):
         if not start:
             return [move for move in self.game.legal_moves]
         else:
-            return [move for move in self.game.legal_moves if move.from_square == start]
+            return [move for move in self.game.legal_moves if move.from_square == (start[0] * 8 + start[1])]
 
     def turn(self):
         return "White" if self.game.turn else "Black"
