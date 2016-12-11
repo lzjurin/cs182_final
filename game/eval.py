@@ -85,7 +85,7 @@ class ChessAI:
     def nextMove(self, depth=1):
         if not depth:
             return (self.eval(), None)
-        func = max if (depth & 1) == int(self.gamestate.turn_bool()) else min
+        func = min if (depth & 1) ^ int(self.gamestate.turn_bool()) else max
         vals = []
         for move in self.gamestate.legalMoves():
             self.gamestate.move(move)
@@ -99,7 +99,7 @@ class ChessAI:
         return sum(map(lambda (x, y): float(x) * y, zip(self.params, [self.threat(), self.material()])))
     def moveEval(self):
         moves = []
-        for move in self.legalMoves():
+        for move in self.gamestate.available():
             c = ChessAI(self.gamestate.move(move))
             moves.append(c.eval(),move)
         return max(moves)[1]

@@ -37,8 +37,11 @@ class Game(object):
         except Exception as e:
             print e
 
-    def legalMoves(self):
-        return [move for move in self.game.legal_moves]
+    def legalMoves(self, start=None):
+        if not start:
+            return [move for move in self.game.legal_moves]
+        else:
+            return [move for move in self.game.legal_moves if move.from_square == start]
 
     def turn(self):
         return "White" if self.game.turn else "Black"
