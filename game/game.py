@@ -8,12 +8,10 @@ class Game(object):
         else:
             self.game = chess.Board(fen=config)
         self.squares = chess.SQUARES
-
         self.WLesserValue = {1: [],2:[chess.Piece.from_symbol('p')],\
         3:[chess.Piece.from_symbol('p')],4:[chess.Piece.from_symbol('p'),chess.Piece.from_symbol('b'),chess.Piece.from_symbol('n')],\
         5: [chess.Piece.from_symbol('p'),chess.Piece.from_symbol('b'),chess.Piece.from_symbol('n'),chess.Piece.from_symbol('r')],\
         6: [chess.Piece.from_symbol('p'),chess.Piece.from_symbol('b'),chess.Piece.from_symbol('n'),chess.Piece.from_symbol('r'),chess.Piece.from_symbol('q')]}
-
         self.BLesserValue = {1: [],2:[chess.Piece.from_symbol('P')],\
         3:[chess.Piece.from_symbol('P')],4:[chess.Piece.from_symbol('P'),chess.Piece.from_symbol('B'),chess.Piece.from_symbol('N')],\
         5: [chess.Piece.from_symbol('P'),chess.Piece.from_symbol('B'),chess.Piece.from_symbol('N'),chess.Piece.from_symbol('R')],\
@@ -53,6 +51,8 @@ class Game(object):
 
     def over(self):
         return self.game.is_game_over()
+    def isDraw(self):
+        return self.game.can_claim_threefold_repetition() or self.game.is_fivefold_repetition()
 
     def __str__(self):
         return self.game.__str__()
