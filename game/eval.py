@@ -110,6 +110,34 @@ class ChessAI:
             c = ChessAI(self.gamestate.move(move))
             moves.append(c.eval(),move)
         return max(moves)[1]
+    def pawnStructure(self):
+        def helper(self,isWhite):
+            total = 0
+            pawns = self.gamestate.pieces(isWhite,1)
+
+            for y,x in pawns:
+                # if not filter(lambda (a,b): b==x, self.gamestate.pieces(not isWhite,1)):
+                #     total += 1
+                if isWhite:
+                    for piece in self.gamestate.threatened()[0][y][x]:
+                        if piece == chess.Piece.from_symbol('P'):
+                            total += 1
+                else:
+                    for piece in self.gamestate.threatened()[1][y][x]:
+                        if piece == chess.Piece.from_symbol('p'):
+                            total += 1
+                if not filter(lambda (a,b): b==x or b==x-1 or b==x+1, self.gamestate.pieces(not isWhite,1)):
+                    total += 3
+                if not filter(lambda (a,b): b==x-1 or b==x+1, self.gamestate.pieces(isWhite,1)):
+                    total -= 2
+            if isWhite:
+                if len([(y,x) for (y,x) in pawns if y == min(pawns)[0]]) == 1 and chess.Piece.from_symbol('p') in self.gamestate.threatened()[1][y+1][x]:
+                    total -= 3
+            else:
+                if len([(y,x) for (y,x) in pawns if y == min(pawns)[0]]) == 1 and chess.Piece.from_symbol('P') in self.gamestate.threatened()[1][y-1][x]:
+                    total -= 3
+
+
     def kingSafety(self):
         whiteKingPos = self.gamestate.pieces(True,6)[0]
         blackKingPos = self.gamestate.pieces(False,6)[0]
