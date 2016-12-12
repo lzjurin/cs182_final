@@ -57,7 +57,7 @@ class Game(object):
     def move(self, move):
         try:
             if self.game.is_castling(move):
-                self.hasCastled[int(self.turn)] = true
+                self.hasCastled[int(self.turn)] = True
             self.game.push(move)
         except Exception as e:
             print e
