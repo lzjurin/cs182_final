@@ -144,10 +144,11 @@ class ChessAI:
 
     def moveEval(self):
         moves = []
-        for move in self.gamestate.available():
+        for move in self.gamestate.legalMoves():
             c = ChessAI(self.gamestate.move(move))
             moves.append(c.eval(),move)
         return max(moves)[1]
+        
     def pieceValues(self):
         def helper(isWhite):
             total = 0
