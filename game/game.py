@@ -30,7 +30,7 @@ class Game(object):
         for i in xrange(len(attackers)):
             attacker = self.game.piece_at(attackers[i])
             for pos in newsquares[i]:
-                if self.game.piece_at(pos) and pos not in attackedsquares[i] and self.game.piece_at(pos).piece_type > piece.piece_type and (self.game.piece_at(pos).piece_type > attacker.piece_type or not (self.defended(piece.color, pos) and self.defended(piece.color, square))):
+                if self.game.piece_at(pos) and pos not in attackedsquares[i] and self.game.piece_at(pos).piece_type > piece.piece_type and (self.game.piece_at(pos).piece_type > attacker.piece_type or not (self.defended(pos, piece.color) and self.defended(square, piece.color))):
                     return True
         return False
 
@@ -46,7 +46,7 @@ class Game(object):
         for i in xrange(len(attackers)):
             attacker = self.game.piece_at(attackers[i])
             for attacked in attackedsquares[i]:
-                if attacked != square and self.game.piece_at(attacked) and ((self.game.piece_at(attacked).piece_type > attacker.piece_type or not self.defended(piece.color, attacked)) or (piece.piece_type > attacker.piece_type or not self.defended(piece.color, square))):
+                if attacked != square and self.game.piece_at(attacked) and ((self.game.piece_at(attacked).piece_type > attacker.piece_type or not self.defended(attacked, piece.color)) or (piece.piece_type > attacker.piece_type or not self.defended(square, piece.color))):
                     return True
         return False
 
