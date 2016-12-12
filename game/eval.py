@@ -2,13 +2,14 @@ import chess, game
 import os, sys
 
 class ChessAI:
-    def __init__(self, gamestate, params=[1,1,1,1,1,1,1]):
+    def __init__(self, gamestate, params=[1,1,1,1,1,1,1,1]):
         self.gamestate = gamestate
         self.params = params
         self.materialWeight = 1
         self.threatWeight = 1
         self.kingSafetyTotalAttackers={0:0,1:0,2:50,3:75,4:88,5:94,6:97,7:99,8:99,9:99,10:99}
-        self.kingSafetyThreats={chess.Piece.from_symbol('P'):1,chess.Piece.from_symbol('B'): 20,chess.Piece.from_symbol('N'): 20,chess.Piece.from_symbol('R'): 40, chess.Piece.from_symbol('Q'): 80}
+        self.bKingSafetyThreats={chess.Piece.from_symbol('P'):1,chess.Piece.from_symbol('B'): 20,chess.Piece.from_symbol('N'): 20,chess.Piece.from_symbol('R'): 40, chess.Piece.from_symbol('Q'): 80}
+        self.wKingSafetyThreats={chess.Piece.from_symbol('p'):1,chess.Piece.from_symbol('b'): 20,chess.Piece.from_symbol('n'): 20,chess.Piece.from_symbol('r'): 40, chess.Piece.from_symbol('q'): 80}
         self.pawnPositionBonus =  [[0, 0, 0, 0, 0, 0, 0, 0], [50, 50, 50, 50, 50, 50, 50, 50], [10, 10, 20, 30, 30, 20, 10, 10], [5, 5, 10, 25, 25, 10, 5, 5], [0, 0, 0, 20, 20, 0, 0, 0], [5, -5, -10, 0, 0, -10, -5, 5], [5, 10, 10, -20, -20, 10, 10, 5], [0, 0, 0, 0, 0, 0, 0, 0]]
         self.knightPositionBonus = [[-50, -40, -30, -30, -30, -30, -40, -50], [-40, -20, 0, 0, 0, 0, -20, -40], [-30, 0, 10, 15, 15, 10, 0, -30], [-30, 5, 15, 20, 20, 15, 5, -30], [-30, 0, 15, 20, 20, 15, 0, -30], [-30, 5, 10, 15, 15, 10, 5, -30], [-40, -20, 0, 5, 5, 0, -20, -40], [-50, -40, -30, -30, -30, -30, -40, -50]]
         self.bishopPositionBonus = [[-20, -10, -10, -10, -10, -10, -10, -20], [-10, 0, 0, 0, 0, 0, 0, -10], [-10, 0, 5, 10, 10, 5, 0, -10], [-10, 5, 5, 10, 10, 5, 5, -10], [-10, 0, 10, 10, 10, 10, 0, -10], [-10, 10, 10, 10, 10, 10, 10, -10], [-10, 5, 0, 0, 0, 0, 5, -10], [-20, -10, -10, -10, -10, -10, -10, -20]]
@@ -87,6 +88,16 @@ class ChessAI:
                     pieceThreat -= 1
                 if pieceThreat > 0 and smallerThreat:
                     wSum -= self.gamestate.values[n]
+                if self.gamestate.pinned(y*8 + x):
+                    if n == 6:
+                        wSum -= 9
+                    else:
+                        wSum-= self.gamestate.values[n]
+                if self.gamestate.forked(y*8 + x):
+                    if n == 6:
+                        wSum -= 9
+                    else:
+                        wSum -= self.gamestate.values[n]
             for y,x in bPieces:
                 # Get coordinates of attacking pieces
                 pieceThreat = 0
@@ -102,7 +113,19 @@ class ChessAI:
                         pieceThreat -= 1
                 if pieceThreat > 0 and smallerThreat:
                     bSum -= self.gamestate.values[n]
+                if self.gamestate.pinned(y*8+x):
+                    if n == 6:
+                        bSum -= 9
+                    else:
+                        bSum-= self.gamestate.values[n]
+                if self.gamestate.forked(y*8+x):
+                    if n == 6:
+                        bSum -= 9
+                    else:
+                        bSum -= self.gamestate.values[n]
         return wSum - bSum
+    def mobility(self):
+        return len(self.gamestate.legalMoves(color=True)) - len(self.gamestate.legalMoves(color=False))
 
     def nextMove(self, depth=1):
         if not depth:
@@ -117,7 +140,7 @@ class ChessAI:
         return (val, self.gamestate.legalMoves()[vals.index(val)])
 
     def eval(self):
-        return sum(map(lambda (x, y): float(x) * y, zip(self.params, [self.threat(), self.material(), self.space(),self.pieceSpecific(),self.pieceValues(),self.pawnStructure(), self.kingSafety()])))
+        return sum(map(lambda (x, y): float(x) * y, zip(self.params, [self.threat(), self.material(), self.space(),self.pieceSpecific(),self.pieceValues(),self.pawnStructure(), self.kingSafety(), self.mobility()])))
 
     def moveEval(self):
         moves = []
@@ -246,11 +269,18 @@ class ChessAI:
                 attackingPieces = []
                 for y,x in kingZone:
                     for threat in self.gamestate.threatened()[int(isWhite)][y][x]:
-                        subtotal += self.kingSafetyThreats[threat[1]]
-                        if threat[0] in attackingPieces:
-                            continue
+                        if isWhite:
+                            subtotal += self.wkingSafetyThreats[threat[1]]
+                            if threat[0] in attackingPieces:
+                                continue
+                            else:
+                                attackingPieces.append(threat[0])
                         else:
-                            attackingPieces.append(threat[0])
+                            subtotal += self.bkingSafetyThreats[threat[1]]
+                            if threat[0] in attackingPieces:
+                                continue
+                            else:
+                                attackingPieces.append(threat[0])
                 return total - (self.kingSafetyTotalAttackers[totalAttackingPieces] * subtotal)/100.0
             else:
                 return total

@@ -33,7 +33,7 @@ class Game(object):
                     return True
         return False
 
-    def defended(self, color=True, square):
+    def defended(self, square, color=True):
         return any(self.game.attackers(color, square))
 
     def forked(self, square):
