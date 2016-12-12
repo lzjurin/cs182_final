@@ -3,7 +3,7 @@ import os, sys
 from collections import deque
 
 class ChessAI:
-    def __init__(self, gamestate, params=[1,1,1,1,1,1,1,1]):
+    def __init__(self, gamestate, params=[0.025,0.025,0.0125,0.0125,0.0067,0.033,0.005,0.02]):
         self.gamestate = gamestate
         self.params = params
         self.materialWeight = 1
@@ -187,7 +187,7 @@ class ChessAI:
                 # Enemy king Y, Enemy king X
                 eKY,eKX = self.gamestate.pieces(not isWhite,6)[0]
                 if abs(eKX - x) <= 1:
-                    total += 1.0/abs(eKY - y)
+                    total += 1.0/max(abs(eKY - y),1)
             if isWhite:
                 for (y,x) in knights:
                     if chess.Piece.from_symbol('P') in self.gamestate.threatened()[int(not isWhite)][y][x] and not [(py,px) for (py,px) in self.gamestate.pieces(isWhite,1) if abs(px-x) <= 1 and px != x and py > y]:
