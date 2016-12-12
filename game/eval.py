@@ -162,14 +162,14 @@ class ChessAI:
                 for (y,x) in pieces:
                     if isWhite:
                         if n == 6 and self.material(int(not isWhite)) < 13:
-                            total += self.index[n+1][x][7]
+                            total += self.index[n+1][x][y]
                         else:
                             total += self.index[n][x][y]
                     else:
                         if n == 6 and self.material(int(not isWhite)) < 13:
-                            total += list(reversed(self.index[n+1]))[x][7]
+                            total += self.index[n+1][x][7-y]
                         else:
-                            total += list(reversed(self.index[n]))[x][y]
+                            total += self.index[n][x][7-y]
             return total
         return helper(True) - helper(False)
     def pieceSpecific(self):
