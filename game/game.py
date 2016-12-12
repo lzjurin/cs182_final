@@ -24,16 +24,17 @@ class Game(object):
         if not piece:
             return False
         attackers = list(self.game.attackers(not piece.color, square))
-        attackedsquares = dict(zip(attackers, map(self.game.attacks, attackers)))
+        attackedsquares = map(self.game.attacks, attackers)
         self.game.remove_piece_at(square)
-        newsquares = dict(zip(attackers, map(self.game.attacks, attackers)))
-        for attacker in attackers:
-            for pos in newsquares[attackers]:
-                if self.game.piece_at(pos) and pos not in attackedsquares[attackers] and self.game.piece_at(pos).piece_type > piece.piece_type and (self.game.piece_at(pos).piece_type > attacker.piece_type or not (self.defended(piece.color, pos) and self.defended(piece.color, square))):
+        newsquares = map(self.game.attacks, attackers)
+        for i in xrange(len(attackers)):
+            attacker = self.game.piece_at(attackers[i])
+            for pos in newsquares[i]:
+                if self.game.piece_at(pos) and pos not in attackedsquares[i] and self.game.piece_at(pos).piece_type > piece.piece_type and (self.game.piece_at(pos).piece_type > attacker.piece_type or not (self.defended(piece.color, pos) and self.defended(piece.color, square))):
                     return True
         return False
 
-    def defended(self, color=True, square):
+    def defended(self, square, color=True):
         return any(self.game.attackers(color, square))
 
     def forked(self, square):
@@ -42,15 +43,16 @@ class Game(object):
             return False
         attackers = list(self.game.attackers(not piece.color, square))
         attackedsquares = dict(zip(attackers, map(self.game.attacks, attackers)))
-        for attacker in attackers:
-            for attacked in attackedsquares[attacker]:
+        for i in xrange(len(attackers)):
+            attacker = self.game.piece_at(attackers[i])
+            for attacked in attackedsquares[i]:
                 if attacked != square and self.game.piece_at(attacked) and ((self.game.piece_at(attacked).piece_type > attacker.piece_type or not self.defended(piece.color, attacked)) or (piece.piece_type > attacker.piece_type or not self.defended(piece.color, square))):
                     return True
         return False
 
     def move(self, move):
         try:
-            if self.board.is_castling(move):
+            if self.game.is_castling(move):
                 self.hasCastled[int(self.turn)] = true
             self.game.push(move)
         except Exception as e:
