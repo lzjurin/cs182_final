@@ -6,10 +6,17 @@ class ChessAI:
         self.params = params
         self.materialWeight = 1
         self.threatWeight = 1
-    def material(self):
+        self.kingSafetyTotalAttackers={1:0,2:50,3:75,4:88,5:94,6:97,7:99,8:99,9:99,10:99}
+        self.kingSafetyThreats={chess.Piece.from_symbol('P'):1,chess.Piece.from_symbol('B'): 20,chess.Piece.from_symbol('N'): 20,chess.Piece.from_symbol('R'): 40, chess.Piece.from_symbol('Q'): 80}
+    def material(self,side=-1):
         whiteScore = len(self.gamestate.pieces(True,1)) + 3 * (len(self.gamestate.pieces(True,2)) + len(self.gamestate.pieces(True,3))) + 5 * len(self.gamestate.pieces(True,4)) + 9 * len(self.gamestate.pieces(True,5))
         blackScore = len(self.gamestate.pieces(False,1)) + 3 * (len(self.gamestate.pieces(False,2)) + len(self.gamestate.pieces(False,3))) + 5 * len(self.gamestate.pieces(False,4)) + 9 * len(self.gamestate.pieces(False,5))
-        return  whiteScore - blackScore
+        if side == -1:
+            return  whiteScore - blackScore
+        if side == 0:
+            return blackScore
+        if side == 1:
+            return whiteScore
     def advance(self):
         wSum = -self.gamestate.pieces(True,6)[0][0]
         bSum = 8 - self.gamestate.pieces(False,6)[0][0]
@@ -110,14 +117,28 @@ class ChessAI:
             y,x = self.gamestate.pieces(isWhite,6)[0]
             total = 0
             if castled:
-                total += 5
+                total += 100
                 pawns = self.gamestate.pieces(isWhite,1)
                 if isWhite:
                     for p in pawns:
                         if p == (y+1,x) or p == (y+1,x+1) or p == (y+1,x-1):
-                            total += 1
+                            total += 10
                 else:
                     for p in pawns:
                         if p == (y-1,x) or p == (y-1,x+1) or p == (y-1,x-1):
-                            total += 1
-            kingZone = self.gamestate.
+                            total += 10
+            kingZone = self.gamestate.legalmoves(y,x)
+            if self.material(int(not isWhite)) > 12:
+                subtotal = 0
+                totalAttackingPieces = 0
+                attackingPieces = []
+                for y,x in kingzone:
+                    for threat in self.gamestate.threatened()[int(isWhite)][y][x]:
+                        subtotal += self.kingSafetyThreats[threat[1]]
+                        if threat[0] in attackingPieces:
+                            continue
+                        else:
+                            attackingPieces.append(threat[0])
+                return total - (kingSafetyTotalAttackers[totalAttackingPieces] * subtotal)/100.0
+            else:
+                return total    
