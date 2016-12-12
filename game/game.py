@@ -17,24 +17,41 @@ class Game(object):
         5: [chess.Piece.from_symbol('P'),chess.Piece.from_symbol('B'),chess.Piece.from_symbol('N'),chess.Piece.from_symbol('R')],\
         6: [chess.Piece.from_symbol('P'),chess.Piece.from_symbol('B'),chess.Piece.from_symbol('N'),chess.Piece.from_symbol('R'),chess.Piece.from_symbol('Q')]}
         self.values = {1:1,2:3,3:3,4:5,5:9,6:1000}
+        self.hasCastled = [False] * 2
 
     def pinned(self, square):
         piece = self.game.piece_at(square)
         if not piece:
             return False
-        return self.game.is_pinned(piece.color, square)
+        attackers = list(self.game.attackers(not piece.color, square))
+        attackedsquares = dict(zip(attackers, map(self.game.attacks, attackers)))
+        self.game.remove_piece_at(square)
+        newsquares = dict(zip(attackers, map(self.game.attacks, attackers)))
+        for attacker in attackers:
+            for pos in newsquares[attackers]:
+                if self.game.piece_at(pos) and pos not in attackedsquares[attackers] and self.game.piece_at(pos).piece_type > piece.piece_type and (self.game.piece_at(pos).piece_type > attacker.piece_type or not (self.defended(piece.color, pos) and self.defended(piece.color, square))):
+                    return True
+        return False
+
+    def defended(self, color=True, square):
+        return any(self.game.attackers(color, square))
 
     def forked(self, square):
         piece = self.game.piece_at(square)
         if not piece:
             return False
-        enemy = list(self.game.attackers(not piece.color, square))
-        forkpotentials = [self.game.piece_at(pos) for pos in list(set(reduce(lambda x, y: x + y, map(self.game.attacks, enemy)))) if not square == pos and self.game.piece_at(pos).color == piece.color]
-        return any([poten for poten in forkpotentials if poten.piece_type > piece.piece_type or not len(self.game.attackers(piece.color, square))])
-
+        attackers = list(self.game.attackers(not piece.color, square))
+        attackedsquares = dict(zip(attackers, map(self.game.attacks, attackers)))
+        for attacker in attackers:
+            for attacked in attackedsquares[attacker]:
+                if attacked != square and self.game.piece_at(attacked) and self.game.piece_at(attacked).piece_type > attacker.piece_type and piece.piece_type > attacker.piece_type:
+                    return True
+        return False
 
     def move(self, move):
         try:
+            if self.board.is_castling(move):
+                self.hasCastled[int(self.turn)] = true
             self.game.push(move)
         except Exception as e:
             print e
@@ -51,11 +68,21 @@ class Game(object):
         except Exception as e:
             print e
 
-    def legalMoves(self, start=None):
+    def legalMoves(self, start=None, color=None):
         if not start:
-            return [move for move in self.game.legal_moves]
+            if not color:
+                return [move for move in self.game.legal_moves]
+            else:
+                old = self.game.turn
+                self.game.turn = color
+                out = [move for move in self.game.legal_moves]
+                self.game.turn = old
+                return out
         else:
             return [move for move in self.game.legal_moves if move.from_square == (start[0] * 8 + start[1])]
+
+    def hasCastled(self, color=True):
+        return self.hasCastled[int(color)]
 
     def kingzone(self, color=True):
         position = list(self.game.pieces(6, color))[0]
@@ -75,8 +102,9 @@ class Game(object):
 
     def over(self):
         return self.game.is_game_over()
+
     def isDraw(self):
-        return self.game.can_claim_threefold_repetition() or self.game.is_fivefold_repetition()
+        return self.game.can_claim_threefold_repetition()
 
     def __str__(self):
         return self.game.__str__()
