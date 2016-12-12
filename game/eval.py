@@ -8,6 +8,8 @@ class ChessAI:
         self.threatWeight = 1
         self.kingSafetyTotalAttackers={1:0,2:50,3:75,4:88,5:94,6:97,7:99,8:99,9:99,10:99}
         self.kingSafetyThreats={chess.Piece.from_symbol('P'):1,chess.Piece.from_symbol('B'): 20,chess.Piece.from_symbol('N'): 20,chess.Piece.from_symbol('R'): 40, chess.Piece.from_symbol('Q'): 80}
+        # self.wPawnTable=[[0,  0,  0,  0,  0,  0,  0,  0],[50, 50, 50, 50, 50, 50, 50, 50],[10, 10, 20, 30, 30, 20, 10, 10],[5, 5, 10, 25, 25, 10, 5, 5], [0, 0, 0, 20, 20, 0, 0, 0],[5, -5,-10, 0, 0,-10, -5, 5],[5, 10, 10,-20,-20, 10, 10, 5],[0, 0, 0, 0, 0, 0, 0, 0]]
+        # self.wKnightTable=[]
 
     def material(self,side=-1):
         whiteScore = len(self.gamestate.pieces(True,1)) + 3 * (len(self.gamestate.pieces(True,2)) + len(self.gamestate.pieces(True,3))) + 5 * len(self.gamestate.pieces(True,4)) + 9 * len(self.gamestate.pieces(True,5))
@@ -112,12 +114,38 @@ class ChessAI:
             c = ChessAI(self.gamestate.move(move))
             moves.append(c.eval(),move)
         return max(moves)[1]
+    # def pieceValues(self):
+    def pieceSpecific(self):
+        def helper(self,isWhite):
+            total = 0
+            pawns = self.gamestate.pieces(isWhite,1)
+            knights = self.gamestate.pieces(isWhite,2)
+            bishops = self.gamestate.pieces(isWhite,3)
+            rooks = self.gamestate.pieces(isWhite,4)
+            queen = self.gamestate.pieces(isWhite,5)
+            for (y,x) in pawns:
+                # Enemy king Y, Enemy king X
+                eKY,eKX = self.gamestate.pieces(not isWhite,6)
+                if abs(eKX - x) <= 1:
+                    total += 1.0/abs(eKY - Y)
+            if isWhite:
+                for (y,x) in knights:
+                    if chess.Piece.from_symbol('P') in self.gamestate.threatened()[int(not isWhite)][y][x] and not [(py,px) for (py,px) in self.gamestate.pieces(isWhite,1) if abs(px-x) <= 1 and px != x and py > y]:
+                        total += 5
+                for (y,x) in bishops:
+                    if chess.Piece.from_symbol('P') in self.gamestate.threatened()[int(not isWhite)][y][x] and not [(py,px) for (py,px) in self.gamestate.pieces(isWhite,1) if abs(px-x) <= 1 and px != x and py > y]:
+                        total += 3
+                for (y,x) in rooks:
+                    enemyPawns = self.gamestate.pieces(not isWhite,1)
+                    pawnsInFile = filter(lambda (py,px): x == px)
+
+
 
     def pawnStructure(self):
         def helper(self,isWhite):
             total = 0
             pawns = self.gamestate.pieces(isWhite,1)
-
+            differentXValues=[]
             for y,x in pawns:
                 # if not filter(lambda (a,b): b==x, self.gamestate.pieces(not isWhite,1)):
                 #     total += 1
@@ -133,12 +161,16 @@ class ChessAI:
                     total += 3
                 if not filter(lambda (a,b): b==x-1 or b==x+1, self.gamestate.pieces(isWhite,1)):
                     total -= 2
+                if x not in differentXValues:
+                    differentXValues.append(x)
+            total -= (len(pawns) - len(differentXValues))
             if isWhite:
                 if len([(y,x) for (y,x) in pawns if y == min(pawns)[0]]) == 1 and chess.Piece.from_symbol('p') in self.gamestate.threatened()[1][y+1][x]:
                     total -= 3
             else:
                 if len([(y,x) for (y,x) in pawns if y == min(pawns)[0]]) == 1 and chess.Piece.from_symbol('P') in self.gamestate.threatened()[1][y-1][x]:
                     total -= 3
+        return helper(True) - helper(False)
 
     def kingSafety(self):
         whiteKingPos = self.gamestate.pieces(True,6)[0]
