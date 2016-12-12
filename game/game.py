@@ -1,5 +1,6 @@
 import chess
 import os, sys
+from collections import deque
 
 class Game(object):
     def __init__(self, config=None):
@@ -25,18 +26,16 @@ class Game(object):
             return False
         attackers = list(self.game.attackers(not piece.color, square))
         attackedsquares = map(self.game.attacks, attackers)
-        movestack = self.game.move_stack
+        movestack = deque(map(lambda move: chess.Move.from_uci(move.uci()), list(self.game.move_stack)))
         self.game.remove_piece_at(square)
         newsquares = map(self.game.attacks, attackers)
+        self.game.set_piece_at(square, piece)
+        self.game.move_stack = movestack
         for i in xrange(len(attackers)):
             attacker = self.game.piece_at(attackers[i])
             for pos in newsquares[i]:
                 if self.game.piece_at(pos) and pos not in attackedsquares[i] and self.game.piece_at(pos).piece_type > piece.piece_type and (self.game.piece_at(pos).piece_type > attacker.piece_type or not (self.defended(pos, piece.color) and self.defended(square, piece.color))):
-                    self.game.set_piece_at(square, piece)
-                    self.game.move_stack = movestack
                     return True
-        self.game.set_piece_at(square, piece)
-        self.game.move_stack = movestack
         return False
 
     def defended(self, square, color=True):
