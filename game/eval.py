@@ -244,6 +244,9 @@ class ChessAI:
         return helper(True) - helper(False)
 
     def kingSafety(self):
+        print self.gamestate
+        print self.gamestate.pieces(True, 6)
+        print self.gamestate.pieces(piece_type=6)
         whiteKingPos = self.gamestate.pieces(True,6)[0]
         blackKingPos = self.gamestate.pieces(False,6)[0]
         def helper(isWhite):
