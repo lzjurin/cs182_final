@@ -8,6 +8,7 @@ class ChessAI:
         self.threatWeight = 1
         self.kingSafetyTotalAttackers={1:0,2:50,3:75,4:88,5:94,6:97,7:99,8:99,9:99,10:99}
         self.kingSafetyThreats={chess.Piece.from_symbol('P'):1,chess.Piece.from_symbol('B'): 20,chess.Piece.from_symbol('N'): 20,chess.Piece.from_symbol('R'): 40, chess.Piece.from_symbol('Q'): 80}
+
     def material(self,side=-1):
         whiteScore = len(self.gamestate.pieces(True,1)) + 3 * (len(self.gamestate.pieces(True,2)) + len(self.gamestate.pieces(True,3))) + 5 * len(self.gamestate.pieces(True,4)) + 9 * len(self.gamestate.pieces(True,5))
         blackScore = len(self.gamestate.pieces(False,1)) + 3 * (len(self.gamestate.pieces(False,2)) + len(self.gamestate.pieces(False,3))) + 5 * len(self.gamestate.pieces(False,4)) + 9 * len(self.gamestate.pieces(False,5))
@@ -17,6 +18,7 @@ class ChessAI:
             return blackScore
         if side == 1:
             return whiteScore
+
     def advance(self):
         wSum = -self.gamestate.pieces(True,6)[0][0]
         bSum = 8 - self.gamestate.pieces(False,6)[0][0]
@@ -101,15 +103,16 @@ class ChessAI:
         val = func(vals)
         return (val, self.gamestate.legalMoves()[vals.index(val)])
 
-
     def eval(self):
         return sum(map(lambda (x, y): float(x) * y, zip(self.params, [self.threat(), self.material()])))
+
     def moveEval(self):
         moves = []
         for move in self.gamestate.available():
             c = ChessAI(self.gamestate.move(move))
             moves.append(c.eval(),move)
         return max(moves)[1]
+
     def pawnStructure(self):
         def helper(self,isWhite):
             total = 0
@@ -136,7 +139,6 @@ class ChessAI:
             else:
                 if len([(y,x) for (y,x) in pawns if y == min(pawns)[0]]) == 1 and chess.Piece.from_symbol('P') in self.gamestate.threatened()[1][y-1][x]:
                     total -= 3
-
 
     def kingSafety(self):
         whiteKingPos = self.gamestate.pieces(True,6)[0]

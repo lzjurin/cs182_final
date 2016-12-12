@@ -43,6 +43,13 @@ class Game(object):
         else:
             return [move for move in self.game.legal_moves if move.from_square == (start[0] * 8 + start[1])]
 
+    def kingzone(self, color=True):
+        position = list(self.game.pieces(6, color))[0]
+        coords = [position / 8, position % 8]
+        possibles = map(lambda i: map(lambda j: [coords[0] + i, coords[1] + j], xrange(-2, 3)), xrange(-2, 3))
+        possibles = [pos for pos in possibles if (pos[0] * 8 + pos[1]) > -1 and (pos[0] * 8 + pos[1]) < 64]
+        return possibles
+
     def turn(self):
         return "White" if self.game.turn else "Black"
 
