@@ -134,13 +134,9 @@ class ChessAI:
         vals = []
         turn = self.gamestate.turn_bool()
         for move in self.gamestate.legalMoves():
-            print "\n\nChecking move...", self.gamestate
-            print move
             self.gamestate.move(move)
             self.gamestate.game.turn = turn
             vals.append(self.nextMove(depth - 1)[0])
-            print "\n\nAbout to undo move", self.gamestate
-            self.gamestate = oldstate
         val = func(vals)
         return (val, self.gamestate.legalMoves()[vals.index(val)])
 
