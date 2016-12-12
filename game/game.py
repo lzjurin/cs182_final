@@ -44,7 +44,7 @@ class Game(object):
         attackedsquares = dict(zip(attackers, map(self.game.attacks, attackers)))
         for attacker in attackers:
             for attacked in attackedsquares[attacker]:
-                if attacked != square and self.game.piece_at(attacked) and self.game.piece_at(attacked).piece_type > attacker.piece_type and piece.piece_type > attacker.piece_type:
+                if attacked != square and self.game.piece_at(attacked) and ((self.game.piece_at(attacked).piece_type > attacker.piece_type or not self.defended(piece.color, attacked)) or (piece.piece_type > attacker.piece_type or not self.defended(piece.color, square))):
                     return True
         return False
 
