@@ -141,4 +141,5 @@ class ChessAI:
                             attackingPieces.append(threat[0])
                 return total - (kingSafetyTotalAttackers[totalAttackingPieces] * subtotal)/100.0
             else:
-                return total    
+                return total
+    return helper(True) - helper(False)
