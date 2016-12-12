@@ -132,10 +132,15 @@ class ChessAI:
             return (self.eval(), None)
         func = min if (depth & 1) ^ int(self.gamestate.turn_bool()) else max
         vals = []
+        turn = self.gamestate.turn_bool()
         for move in self.gamestate.legalMoves():
+            print "\n\nChecking move...", self.gamestate
+            print move
             self.gamestate.move(move)
+            self.gamestate.game.turn = turn
             vals.append(self.nextMove(depth - 1)[0])
-            self.gamestate.undo()
+            print "\n\nAbout to undo move", self.gamestate
+            self.gamestate = oldstate
         val = func(vals)
         return (val, self.gamestate.legalMoves()[vals.index(val)])
 
@@ -148,7 +153,7 @@ class ChessAI:
             c = ChessAI(self.gamestate.move(move))
             moves.append(c.eval(),move)
         return max(moves)[1]
-        
+
     def pieceValues(self):
         def helper(isWhite):
             total = 0
@@ -245,9 +250,6 @@ class ChessAI:
         return helper(True) - helper(False)
 
     def kingSafety(self):
-        print self.gamestate
-        print self.gamestate.pieces(True, 6)
-        print self.gamestate.pieces(piece_type=6)
         whiteKingPos = self.gamestate.pieces(True,6)[0]
         blackKingPos = self.gamestate.pieces(False,6)[0]
         def helper(isWhite):
