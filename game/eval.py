@@ -137,6 +137,7 @@ class ChessAI:
             self.gamestate.move(move)
             self.gamestate.game.turn = turn
             vals.append(self.nextMove(depth - 1)[0])
+            self.gamestate.undo()
         val = func(vals)
         return (val, self.gamestate.legalMoves()[vals.index(val)])
 
