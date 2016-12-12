@@ -1,5 +1,6 @@
 import chess, game
 import os, sys
+from collections import deque
 
 class ChessAI:
     def __init__(self, gamestate, params=[1,1,1,1,1,1,1,1]):
@@ -134,10 +135,15 @@ class ChessAI:
         vals = []
         turn = self.gamestate.turn_bool()
         for move in self.gamestate.legalMoves():
+            print(chr(27) + "[2J")
+            print self.gamestate
+            movestack = deque(map(lambda move: chess.Move.from_uci(move.uci()), list(self.gamestate.game.move_stack)))
+            fen = self.gamestate.game.board_fen()
             self.gamestate.move(move)
             self.gamestate.game.turn = turn
             vals.append(self.nextMove(depth - 1)[0])
-            self.gamestate.undo()
+            self.gamestate.game.set_board_fen(fen)
+            self.gamestate.game.move_stack = movestack
         val = func(vals)
         return (val, self.gamestate.legalMoves()[vals.index(val)])
 
