@@ -18,6 +18,20 @@ class Game(object):
         6: [chess.Piece.from_symbol('P'),chess.Piece.from_symbol('B'),chess.Piece.from_symbol('N'),chess.Piece.from_symbol('R'),chess.Piece.from_symbol('Q')]}
         self.values = {1:1,2:3,3:3,4:5,5:9,6:1000}
 
+    def pinned(self, square):
+        piece = self.game.piece_at(square)
+        if not piece:
+            return False
+        return self.game.is_pinned(piece.color, square)
+
+    def forked(self, square):
+        piece = self.game.piece_at(square)
+        if not piece:
+            return False
+        enemy = list(self.game.attackers(not piece.color, square))
+        forkpotentials = [self.game.piece_at(pos) for pos in list(set(reduce(lambda x, y: x + y, map(self.game.attacks, enemy)))) if not square == pos and self.game.piece_at(pos).color == piece.color]
+        return any([poten for poten in forkpotentials if poten.piece_type > piece.piece_type or not len(self.game.attackers(piece.color, square))])
+
 
     def move(self, move):
         try:
