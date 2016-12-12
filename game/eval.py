@@ -114,7 +114,8 @@ class ChessAI:
             c = ChessAI(self.gamestate.move(move))
             moves.append(c.eval(),move)
         return max(moves)[1]
-    # def pieceValues(self):
+    def pieceValues(self):
+        
     def pieceSpecific(self):
         def helper(self,isWhite):
             total = 0
@@ -137,7 +138,27 @@ class ChessAI:
                         total += 3
                 for (y,x) in rooks:
                     enemyPawns = self.gamestate.pieces(not isWhite,1)
-                    pawnsInFile = filter(lambda (py,px): x == px)
+                    pawnsInRow = filter(lambda (py,px): y == py, enemyPawns)
+                    if pawnsInRow > 1:
+                        total += 4
+                    pawnsInFile = filter(lambda (py,px): x == px, enemyPawns + pawns)
+                    if pawnsInFile == 0:
+                        total += 2
+            else:
+                for (y,x) in knights:
+                    if chess.Piece.from_symbol('p') in self.gamestate.threatened()[int(not isWhite)][y][x] and not [(py,px) for (py,px) in self.gamestate.pieces(isWhite,1) if abs(px-x) <= 1 and px != x and py < y]:
+                        total += 5
+                for (y,x) in bishops:
+                    if chess.Piece.from_symbol('p') in self.gamestate.threatened()[int(not isWhite)][y][x] and not [(py,px) for (py,px) in self.gamestate.pieces(isWhite,1) if abs(px-x) <= 1 and px != x and py < y]:
+                        total += 3
+                for (y,x) in rooks:
+                    enemyPawns = self.gamestate.pieces(not isWhite,1)
+                    pawnsInRow = filter(lambda (py,px): y == py, enemyPawns)
+                    if pawnsInRow > 1:
+                        total += 4
+                    pawnsInFile = filter(lambda (py,px): x == px, enemyPawns + pawns)
+                    if pawnsInFile == 0:
+                        total += 2
 
 
 
