@@ -3,7 +3,7 @@ import os, sys
 from collections import deque
 
 class ChessAI:
-    def __init__(self, gamestate, params=[0.025,0.025,0.0125,0.0125,0.0067,0.033,0.005,0.02]):
+    def __init__(self, gamestate, params=[0.025,0.025,0.0125,0.0125,0.0067,0.033,0.005,0.02,1]):
         self.gamestate = gamestate
         self.params = params
         self.materialWeight = 1
@@ -52,6 +52,13 @@ class ChessAI:
     #     #         bSum -= 1
     #     return wSum - bSum
     # def pawns(self):
+    def checkmate(self):
+        if self.gamestate.over():
+            if self.gamestate.turn() == "White":
+                return -5000
+            elif self.gamestate.turn() == "Black":
+                return 5000
+        return 0
     def space(self):
         if self.gamestate.turn == "White":
             return len(self.gamestate.available()[0]) - len(self.gamestate.available()[1])
@@ -148,7 +155,7 @@ class ChessAI:
         return (val, self.gamestate.legalMoves()[vals.index(val)])
 
     def eval(self):
-        return sum(map(lambda (x, y): float(x) * y, zip(self.params, [self.threat(), self.material(), self.space(),self.pieceSpecific(),self.pieceValues(),self.pawnStructure(), self.kingSafety(), self.mobility()])))
+        return sum(map(lambda (x, y): float(x) * y, zip(self.params, [self.threat(), self.material(), self.space(),self.pieceSpecific(),self.pieceValues(),self.pawnStructure(), self.kingSafety(), self.mobility(),self.checkmate()])))
 
     def moveEval(self):
         moves = []
