@@ -18,7 +18,7 @@ class Game(object):
         5: [chess.Piece.from_symbol('P'),chess.Piece.from_symbol('B'),chess.Piece.from_symbol('N'),chess.Piece.from_symbol('R')],\
         6: [chess.Piece.from_symbol('P'),chess.Piece.from_symbol('B'),chess.Piece.from_symbol('N'),chess.Piece.from_symbol('R'),chess.Piece.from_symbol('Q')]}
         self.values = {1:1,2:3,3:3,4:5,5:9,6:1000}
-        self.hasCastled = [False] * 2
+        self.castled = [False] * 2
 
     def pinned(self, square):
         piece = self.game.piece_at(square)
@@ -88,7 +88,7 @@ class Game(object):
             return [move for move in self.game.legal_moves if move.from_square == (start[0] * 8 + start[1])]
 
     def hasCastled(self, color=True):
-        return self.hasCastled[int(color)]
+        return self.castled[int(color)]
 
     def kingzone(self, color=True):
         position = list(self.game.pieces(6, color))[0]
