@@ -53,7 +53,7 @@ class ChessAI:
     #     return wSum - bSum
     # def pawns(self):
     def checkmate(self):
-        if self.gamestate.over():
+        if self.gamestate.game.is_checkmate():
             if self.gamestate.turn() == "White":
                 return -5000
             elif self.gamestate.turn() == "Black":
