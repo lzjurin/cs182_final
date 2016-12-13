@@ -6,16 +6,17 @@ import numpy as np
 
 # Initialize initial game with passive strategy
 g = game.Game(config='rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1')
-curParams = [0.025,0.025,0.0125,0.0125,0.0067,0.033,0.005,0.02]
+curParams = [0.025,0.025,0.0125,0.0125,0.0067,0.033,0.005,0.02, 1]
 moves = 0
+totMoves = 20
 
-while moves < 10 and not g.over() and not g.isDraw():
+while moves < totMoves and not g.over() and not g.isDraw():
 	moves += 1
 	allMuts = []
 	for i in range(5):
 		mutParams = []
 		for el in curParams:
-			mutParams.append(el * np.random.uniform(1 - np.random.random()*2 / float(moves), 1 + np.random.random()*2 / float(moves)))
+			mutParams.append(el * np.random.uniform(1 - float(totMoves) / (10*float(moves)), 1 + float(totMoves) / (10*float(moves))))
 		allMuts.append(mutParams)
 		f1 = open('mutant' + str(i) + '.py', 'w')
 		f1.write('import chess, game\n')
@@ -25,13 +26,13 @@ while moves < 10 and not g.over() and not g.isDraw():
 		f1.write('e = eval.ChessAI(g, params=' + str(mutParams) + ')\n')
 		f1.write('moves = 0\n')
 		f1.write('while moves < 10 and not g.over() and not g.isDraw():\n')
-		f1.write('\t moves += 1\n')
+		f1.write('\tmoves += 1\n')
 		f1.write('\tscore, move = e.nextMove()\n')
 		f1.write('\tg.move(move)\n')
 		f1.write('print e.eval()')
 		f2 = open('mutant' + str(i) + '.sh', 'w')
 		f2.write('#!/bin/bash\n')
-		f2.write('#SBATCH -t 15\n')
+		f2.write('#SBATCH -t 5\n')
 		f2.write('#SBATCH -p serial_requeue\n')
 		f2.write('#SBATCH -N 1\n')
 		f2.write('#SBATCH -c 4\n')
@@ -68,3 +69,10 @@ while moves < 10 and not g.over() and not g.isDraw():
 	print("Move: " + str(move))
 	print("Score: " + str(score))
 	print("Params: " + str(curParams))
+
+if g.over():
+	print "CHECKMATE"
+elif g.isDraw():
+	print "STALEMATE"
+else:
+	print "INCONCLUSIVE"
