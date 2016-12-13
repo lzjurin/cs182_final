@@ -265,7 +265,7 @@ class ChessAI:
         def helper(isWhite):
             (y,x) = self.gamestate.pieces(isWhite,6)[0]
             total = 0
-            if hasCastled(color=isWhite):
+            if self.gamestate.hasCastled(color=isWhite):
                 total += 100
                 pawns = self.gamestate.pieces(isWhite,1)
                 if isWhite:
