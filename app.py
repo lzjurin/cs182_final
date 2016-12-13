@@ -1,3 +1,7 @@
+'''
+Really basic app to manually run the game. Not upkept, don't use
+'''
+
 from game.game import *
 from optparse import OptionParser
 import time
