@@ -265,8 +265,7 @@ class ChessAI:
         def helper(isWhite):
             (y,x) = self.gamestate.pieces(isWhite,6)[0]
             total = 0
-            # CHANGE TO CHECK FOR IF CASTLED INSTEAD
-            if True:
+            if hasCastled(color=isWhite):
                 total += 100
                 pawns = self.gamestate.pieces(isWhite,1)
                 if isWhite:
@@ -277,7 +276,6 @@ class ChessAI:
                     for p in pawns:
                         if p == (y-1,x) or p == (y-1,x+1) or p == (y-1,x-1):
                             total += 10
-            # CHANGE TO REPRESENT ACTUAL KINGZONE
             kingZone = self.gamestate.kingzone(isWhite)
             if self.material(int(not isWhite)) > 12:
                 subtotal = 0
